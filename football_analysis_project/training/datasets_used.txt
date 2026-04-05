@@ -1,0 +1,13 @@
+4 main data sets are used here
+All are from Roboflow
+Link 1:- 
+https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/1
+Link 2:-
+https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/8
+Link 3:-
+https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/10
+Link 4:-
+https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/11
+
+
+No need to download them, just mentioned for reference
