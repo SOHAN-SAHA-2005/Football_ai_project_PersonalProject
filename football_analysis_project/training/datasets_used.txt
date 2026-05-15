@@ -1,4 +1,4 @@
-4 main data sets are used here
+4 main data sets are used here for player detection
 All are from Roboflow
 Link 1:- 
 https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/1
@@ -9,5 +9,9 @@ https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/da
 Link 4:-
 https://universe.roboflow.com/roboflow-jvuqo/football-players-detection-3zvbc/dataset/11
 
+Dataset used for pitch key points detection:-
+https://universe.roboflow.com/roboflow-jvuqo/football-field-detection-f07vi/dataset/12
+
 
 No need to download them, just mentioned for reference
+

@@ -1,49 +1,47 @@
 import numpy as np
 import cv2
 
-class ViewTransformer():
-    def __init__(self):
-        court_width = 68
-        court_length = 23.32
+class ViewTransformer:
+    def __init__(self, pitch_vertices):
+        """
+        Initializes the transformer with target vertices (the real-world coordinates).
+        """
+        # Convert the list of 32 keypoints from pitch_config into a numpy array
+        self.target_vertices = np.array(pitch_vertices, dtype=np.float32)
 
-        self.pixel_verticies = np.array([
-            [110, 1035],
-            [265, 275],
-            [910, 260],
-            [1640, 915]
-        ])
-
-        self.target_verticies = np.array([
-            [0, court_width],
-            [0, 0],
-            [court_length, 0],
-            [court_length, court_width]
-        ])
-
-        self.pixel_verticies = self.pixel_verticies.astype(np.float32)
-        self.target_verticies = self.target_verticies.astype(np.float32)
-
-        self.perspective_transformer = cv2.getPerspectiveTransform(self.pixel_verticies, self.target_verticies)
-
-    def transform_point(self, point):
-        p = int(point[0]), int(point[1])
-        is_inside = cv2.pointPolygonTest(self.pixel_verticies, p, False) >= 0
-        if not is_inside:
+    def transform_point(self, point, matrix):
+        """
+        Transforms a single pixel coordinate (x, y) into a 2D metric coordinate (meters).
+        """
+        if matrix is None:
             return None
         
-        reshaped_point = point.reshape(-1, 1, 2).astype(np.float32)
-        transform_point = cv2.perspectiveTransform(reshaped_point, self.perspective_transformer)
-
-        return transform_point.reshape(-1,2)
+        # Reshape point for OpenCV perspectiveTransform: must be (1, 1, 2)
+        reshaped_point = np.array(point).reshape(-1, 1, 2).astype(np.float32)
         
-   
-    def add_transformed_positions_to_tracks(self, tracks):
-        for object, object_tracks in tracks.items():
+        # Apply the homography matrix
+        transformed = cv2.perspectiveTransform(reshaped_point, matrix)
+        
+        # Return as a simple [x, y] list
+        return transformed.squeeze().tolist()
+        
+    def add_transformed_positions_to_tracks(self, tracks, matrices):
+        """
+        Loops through all object tracks and applies the specific homography matrix 
+        calculated for each frame to get real-world coordinates.
+        """
+        for object_type, object_tracks in tracks.items():
             for frame_num, track in enumerate(object_tracks):
+                # Ensure we have a valid matrix for this frame
+                matrix = matrices[frame_num]
+                
                 for track_id, track_info in track.items():
-                    position = track_info['position_adjusted']
-                    position = np.array(position)
-                    position_transformed = self.transform_point(position)
-                    if position_transformed is not None:
-                        position_transformed = position_transformed.squeeze().tolist()
-                        tracks[object][frame_num][track_id]['position_transformed'] = position_transformed
+                    # Prioritize camera-adjusted positions for better accuracy
+                    position = track_info.get('position_adjusted', track_info.get('position'))
+                    
+                    if position is not None and matrix is not None:
+                        position_transformed = self.transform_point(position, matrix)
+                        
+                        if position_transformed is not None:
+                            # Save the new real-world metric position into the tracks dictionary
+                            tracks[object_type][frame_num][track_id]['position_transformed'] = position_transformed
